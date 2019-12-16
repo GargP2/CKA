@@ -1,0 +1,28 @@
+POD
+kubectl run --generator=run-pod/v1 nginx --image=nginx
+kubectl run --generator=run-pod/v1 nginx --image=nginx --dry-run -o yaml
+
+DEPLOYMENT
+kubectl create deployment nginx --image=nginx --dry-run -o yaml
+kubectl set image  deployment/nginx-deploy nginx=nginx:1.17 --record
+
+
+SERVICE
+kubectl expose deployment nginx --name=nginx-service --type=NodePort --port=80 --target-port=8080
+kubectl expose deployment nginx --name=nginx-service --type=ClusterIP --port=8080 --dry-run -o yaml
+
+
+LABEL
+kubectl label pod nginx app=nginx
+##########
+
+RBAC
+kubectl create role developer --resource=pods --verb=list,create
+kubectl create rolebinding dev-user-binding --role=developer --user=dev-user
+kubectl get pods --as dev-user
+
+TLS Ceretficate
+openssl x509 -in apiserver.crt -text -noout ## To view any cert
+openssl genrsa -out jane.key 2048 #### To create key
+openssl req -new -key jane.key -subj "/CN=jane" -out jane.csr ### TO generate CSR
+openssl x509 -req -in /etc/kubernetes/pki/apiserver-etcd-client.csr -CA /etc/kubernetes/pki/etcd/ca.crt -CAkey /etc/kubernetes/pki/etcd/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-etcd-client.crtmaster ### for signing CSR
